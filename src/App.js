@@ -39,11 +39,6 @@ const App = () => {
           <Details title="Expense" />
         </Grid>
       </Grid>
-
-      <PushToTalkButtonContainer>
-        <PushToTalkButton />
-        <ErrorPanel />
-      </PushToTalkButtonContainer>
     </div>
   )
 }

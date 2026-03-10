@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { TextField, Typography, Grid, Button, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
+import { 
+  TextField, Typography, Grid, Button, 
+  FormControl, InputLabel, Select, MenuItem, FormHelperText 
+} from '@material-ui/core';
 import { ExpenseTrackerContext } from '../../../context/context';
 import { v4 as uuidv4 } from 'uuid';
 import { useSpeechContext } from '@speechly/react-client';
@@ -22,16 +25,30 @@ const Form = () => {
   const { addTransaction } = useContext(ExpenseTrackerContext);
   const { segment } = useSpeechContext();
   const [open, setOpen] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const createTransaction = () => {
-    if(Number.isNaN(Number(formData.amount)) || !formData.date.includes('-')) return;
+    setSubmitted(true);
 
-    const transaction = { ...formData, amount: Number(formData.amount), id: uuidv4() };
+    if (!formData.amount || !formData.category) {
+      return;
+    }
+
+    if (Number.isNaN(Number(formData.amount)) || !formData.date.includes('-')) {
+      return;
+    }
+
+    const transaction = { 
+      ...formData, 
+      amount: Number(formData.amount), 
+      id: uuidv4() 
+    };
 
     setOpen(true);
     addTransaction(transaction);
     setFormData(initialState);
-  }
+    setSubmitted(false);
+  };
 
   useEffect(() => {
     if(segment){
@@ -107,16 +124,35 @@ const Form = () => {
       </Grid>
 
       <Grid item xs={6}>
-        <FormControl fullWidth>
+        <FormControl fullWidth error={submitted && !formData.category}>
           <InputLabel>Category</InputLabel>
-          <Select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })}>
-            {selectedCategories.map((c) => <MenuItem key={c.type} value={c.type}>{c.type}</MenuItem>)}
+          <Select
+            value={formData.category}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+          >
+            {selectedCategories.map((c) => (
+              <MenuItem key={c.type} value={c.type}>
+                {c.type}
+              </MenuItem>
+            ))}
           </Select>
+
+          {submitted && !formData.category && (
+            <FormHelperText>Category is required</FormHelperText>
+          )}
         </FormControl>
       </Grid>
 
       <Grid item xs={6}>
-        <TextField type="number" label="Amount" fullWidth value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} />
+        <TextField
+          type="number"
+          label="Amount"
+          fullWidth
+          value={formData.amount}
+          error={submitted && !formData.amount}
+          helperText={submitted && !formData.amount ? "Amount is required" : ""}
+          onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+        />
       </Grid>
 
       <Grid item xs={6}>
