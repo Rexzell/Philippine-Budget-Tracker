@@ -27,14 +27,36 @@ const Form = () => {
   const [open, setOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  const isAmountEmpty = !formData.amount;
+  const isAmountInvalid =
+    !isAmountEmpty &&
+    (Number.isNaN(Number(formData.amount)) || Number(formData.amount) <= 0);
+
+  const isDateInvalid =
+    !formData.date || isNaN(new Date(formData.date).getTime());
+
   const createTransaction = () => {
     setSubmitted(true);
 
-    if (!formData.amount || !formData.category) {
+    if (!formData.amount || !formData.category || !formData.date) {
       return;
     }
 
-    if (Number.isNaN(Number(formData.amount)) || !formData.date.includes('-')) {
+    if (
+      isAmountEmpty ||
+      isAmountInvalid ||
+      !formData.category ||
+      !formData.date
+    ) {
+      return;
+    }
+
+    const parsedDate = new Date(formData.date);
+
+    if (
+      Number.isNaN(Number(formData.amount)) ||
+      isNaN(parsedDate.getTime())
+    ) {
       return;
     }
 
@@ -116,7 +138,16 @@ const Form = () => {
       <Grid item xs={6}>
         <FormControl fullWidth>
           <InputLabel>Type</InputLabel>
-          <Select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })}>
+          <Select
+            value={formData.type}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                type: e.target.value,
+                category: '',
+              })
+            }
+          >
             <MenuItem value="Income">Income</MenuItem>
             <MenuItem value="Expense">Expense</MenuItem>
           </Select>
@@ -149,14 +180,62 @@ const Form = () => {
           label="Amount"
           fullWidth
           value={formData.amount}
-          error={submitted && !formData.amount}
-          helperText={submitted && !formData.amount ? "Amount is required" : ""}
-          onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+          error={submitted && (isAmountEmpty || isAmountInvalid)}
+          helperText={
+            submitted
+              ? isAmountEmpty
+                ? "Amount is required"
+                : isAmountInvalid
+                ? "Invalid amount"
+                : null
+              : null
+          }
+          onChange={(e) => {
+            let value = e.target.value;
+
+            if (value === '') {
+              setFormData({ ...formData, amount: value });
+              return;
+            }
+
+            if (/^\d+(\.\d{0,2})?$/.test(value)) {
+              setFormData({ ...formData, amount: value });
+            }
+          }}
+          onKeyDown={(e) => {
+            if (["e", "E", "-", "+"].includes(e.key)) {
+              e.preventDefault();
+            }
+          }}
+          inputProps={{
+            min: 1,
+          }}
         />
       </Grid>
 
       <Grid item xs={6}>
-        <TextField type="date" label="Date" fullWidth value={formData.date} onChange={(e) => setFormData({ ...formData, date: formatDate(e.target.value) })} />
+        <TextField
+          type="date"
+          label="Date"
+          fullWidth
+          value={formData.date}
+          onKeyDown={(e) => e.preventDefault()}
+          error={submitted && isDateInvalid}
+          helperText={
+            submitted && isDateInvalid ? "Select a date" : ""
+          }
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              date: formatDate(e.target.value),
+            })
+          }
+          InputProps={{
+            style: {
+              color: submitted && isDateInvalid ? 'red' : undefined,
+            },
+          }}
+        />
       </Grid>
 
       <Button className={classes.button} variant="outlined" color="primary" fullWidth onClick={createTransaction} >Create</Button>
