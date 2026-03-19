@@ -16,7 +16,7 @@ const Main = () => {
       <CardHeader title="Philippine Budget Tracker" subheader="Made by John Rexzell Alip"/>
       <CardContent>
         <Divider className={classes.divider} />
-        <Typography align="center" variant="h5">Total Balance ₱{balance}</Typography>
+        <Typography align="center" variant="h5">Total Balance ₱{Number(balance).toFixed(2)}</Typography>
         <Divider className={classes.divider} />
         <Form />
       </CardContent>
