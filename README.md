@@ -11,7 +11,7 @@ A web app that tracks income and expenses to help users manage their budget.
 ## Features
 - Responsive UI  
 - User-friendly interface  
-- Users can add income and expenses to track and manage their budget  
+- Users can add and delete income and expenses to effectively track and manage their budget  
 - Users can see the total balance based on their current income and expenses  
 - Animated income and expense bar graph  
 - Saves data locally in the browser  
